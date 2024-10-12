@@ -40,50 +40,49 @@ export const createProduct = (req: Request, res: Response, next: NextFunction) =
     })
       .then((product) => res.send(product))
       .catch((err) => {
+        if (err.name === 'ValidationError') {
+          return next(new BadRequestError(err.message));
+        }
         if (err instanceof Error && err.message.includes('E11000')) {
           return next(new ConflictError(err.message));
         }
-        return next(new BadRequestError(err.message));
+        return next(err);
       })
-      .catch(() => next(new Error('Не получается переместить загруженный файл в постоянное место хранения'))));
+      .catch(next));
 };
 
 export function getProducts(_: Request, res: Response, next: NextFunction) {
   return Product.find({})
     .then((products) => res.send({ items: products, total: products.length }))
-    .catch((err) => next(new Error(err.message)));
+    .catch(next);
 }
 
-export const deleteProduct = (req: Request, res: Response, next: NextFunction) => {
-  if (req.params.id) {
-    return Product.findByIdAndDelete(req.params.id)
-      .then((product) => {
-        if (product) { return res.send(product); }
-        return next(new Error('Передан не валидный ID товара'));
-      })
-      .catch((err) => next(new BadRequestError(err.message)));
-  }
-  return (next(new Error('Пустой параметр запроса')));
-};
+export const deleteProduct = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => Product.findByIdAndDelete(req.params.id)
+  .then((data) => res.send(data))
+  .catch(next);
 
-export const updateProduct = (req: Request, res: Response, next: NextFunction) => {
-  if (req.body.image) {
-    return renameUpload(req.body.image)
-      .then((newImage) => {
-        let upBody = req.body;
-        if (newImage) upBody = { ...req.body, image: newImage };
-        return Product.findByIdAndUpdate(req.params.id, upBody, { new: true })
-          .then((product) => res.send(product))
-          .catch((err) => {
-            if (err instanceof Error && err.message.includes('E11000')) {
-              return next(new ConflictError(err.message));
-            }
-            return next(new BadRequestError(err.message));
-          });
-      })
-      .catch(() => next(new Error('Не получается переместить загруженный файл в постоянное место хранения')));
-  }
-  return Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
+export const updateProduct = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => renameUpload(req.body.image)
+  .then((_) => Product.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true },
+  )
     .then((product) => res.send(product))
-    .catch((err) => next(new BadRequestError(err.message)));
-};
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError(err.message));
+      }
+      if (err instanceof Error && err.message.includes('E11000')) {
+        return next(new ConflictError(err.message));
+      }
+      return next(err);
+    }))
+  .catch(next);

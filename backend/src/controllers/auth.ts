@@ -119,7 +119,7 @@ export const register = (req: Request, res: Response, next: NextFunction) => {
         err instanceof Error
           && err.message.includes('Некорректный email!')
       ) { return next(new BadRequestError(err.message)); }
-      return next(new Error(err.message));
+      return next(err);
     }));
 };
 
@@ -148,7 +148,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       if (err instanceof UnauthorizedError) {
         return next(new UnauthorizedError(err.message));
       }
-      return next(new Error(err.message));
+      return next(err);
     });
 };
 
@@ -215,7 +215,7 @@ export const logout = (req: Request, res: Response, next: NextFunction) => {
             });
             res.send({ success: true });
           })
-          .catch((err) => next(new Error(err.message)));
+          .catch(next);
       })
       .catch((err) => next(new NotFoundError(err.message)));
   } catch (err) {
@@ -228,26 +228,21 @@ export const getCurrentUser = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
-  if (req.user && req.user.id) {
-    return User.findById(req.user.id)
-      .then((user) => {
-        if (!user) {
-          return next(
-            new NotFoundError(
-              'Пользователь по заданному id отсутствует в базе!',
-            ),
-          );
-        }
-        return res.send({
-          user: {
-            email: user!.email,
-            name: user?.name,
-          },
-          success: true,
-        });
-      })
-      .catch((err) => next(new Error(err.message)));
-  }
-  return next(new UnauthorizedError('Необходима авторизация'));
-};
+) => User.findById(req.user!.id!)
+  .then((user) => {
+    if (!user) {
+      return next(
+        new NotFoundError(
+          'Пользователь по заданному id отсутствует в базе!',
+        ),
+      );
+    }
+    return res.send({
+      user: {
+        email: user!.email,
+        name: user?.name,
+      },
+      success: true,
+    });
+  })
+  .catch(next);

@@ -9,7 +9,7 @@ export interface Image {
   originalName: string;
 }
 
-interface IProduct {
+export interface IProduct {
   title: string;
   category: string;
   description: string;
@@ -60,33 +60,5 @@ productSchema.post('findOneAndDelete', (doc) => {
 });
 
 const Product = model<IProduct>('product', productSchema); // основная модель
-
-/**
- * Валидация товарной части заказа
- * @param items - заказанные товары
- * @param total - сумма заказа
- * @returns undefined если все ок или текст ошибки валидации
- */
-export async function validateOrderProduct(items: string[], total: number) {
-  return Promise.all(items.map((item) => Product.findById(item)
-    .then((product) => {
-      if (product === null) return undefined;
-      return product.price;
-    })
-    .catch(() => undefined)))
-    .then((res) => {
-      let totalCalc = 0;
-      for (let i = 0; i < items.length; i += 1) {
-        if (!res[i]) return `Товар с id ${items[i]} не найден`;
-        if (res[i] === null) return `Товар с id ${items[i]} не продается!`;
-        totalCalc += res[i]!;
-      }
-      if (totalCalc !== total) {
-        return 'Неверная сумма заказа';
-      }
-      return undefined;
-    })
-    .catch((err) => err.message);
-}
 
 export default Product;

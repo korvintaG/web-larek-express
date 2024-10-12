@@ -21,9 +21,7 @@ const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
       fileName: path.join(imageURLDir, path.basename(newFileName)),
       originalName: req.file?.originalname,
     });
-  } catch (err) {
-    return next(new Error((err as Error).message));
-  }
+  } catch (err) { return (next(err)); }
 };
 
 export default uploadFile;

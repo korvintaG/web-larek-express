@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "lint": "npx eslint src/**/*.ts",
-    "lintfix": "npx eslint src/controllers/product.ts --fix",
+    "lintfix": "npx eslint src/controllers/auth.ts --fix",
     "build": "tsc",
     "dev": "npx nodemon -L src/app.ts ",
     "start": "ts-node src/app.ts",
@@ -27,6 +27,7 @@
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
+    "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5"

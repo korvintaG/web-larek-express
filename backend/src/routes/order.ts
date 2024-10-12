@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { celebrate, Segments } from 'celebrate';
 import createOrder from '../controllers/order';
-import { orderSchema } from '../middlewares/validations';
+import { orderSchema, validateOrderProduct } from '../middlewares/validations';
 
 const router = Router();
-const orderRouteValidator = celebrate({
+const validateOrder = celebrate({
   [Segments.BODY]: orderSchema,
 });
 
-router.post('/', orderRouteValidator, createOrder);
+router.post('/', validateOrder, validateOrderProduct, createOrder);
 
 export default router;
