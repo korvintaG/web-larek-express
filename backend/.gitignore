@@ -1,5 +1,7 @@
 # Logs
 logs
+request.log 
+error.log 
 *.log
 npm-debug.log*
 
@@ -18,3 +20,4 @@ node_modules
 dist
 temp
 .env
+

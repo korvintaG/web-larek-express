@@ -157,7 +157,9 @@ export class WebLarekAPI extends Api implements IWebLarekAPI {
 	};
 
 	logoutUser = () => {
-		return this.request<ServerResponse<unknown>>('/auth/logout', { method: 'GET', credentials: 'include' });
+		return this.request<ServerResponse<unknown>>('/auth/logout', { method: 'GET', 
+		credentials: 'include' 
+	});
 	};
 
 	createProduct = (data: Omit<IProduct, '_id'>)  =>  {
